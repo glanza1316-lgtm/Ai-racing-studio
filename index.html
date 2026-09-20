@@ -1,0 +1,565 @@
+    <!DOCTYPE html>
+
+<html lang="zh-Hant">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+
+<meta name="theme-color" content="#050505">
+
+<title>AI Racing Studio</title>
+
+<style>
+
+*{box-sizing:border-box}
+
+body{
+
+ margin:0;
+
+ background:#050505;
+
+ color:white;
+
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+
+}
+
+.app{
+
+ max-width:700px;
+
+ margin:auto;
+
+ padding:24px 16px 40px;
+
+}
+
+h1{
+
+ margin:5px 0 3px;
+
+ font-size:32px;
+
+}
+
+.subtitle{
+
+ color:#888;
+
+ margin-bottom:22px;
+
+}
+
+.tabs{
+
+ display:grid;
+
+ grid-template-columns:repeat(3,1fr);
+
+ gap:8px;
+
+ margin-bottom:15px;
+
+}
+
+.tab{
+
+ border:0;
+
+ border-radius:14px;
+
+ padding:13px 5px;
+
+ background:#181818;
+
+ color:#bbb;
+
+ font-size:15px;
+
+ font-weight:700;
+
+}
+
+.tab.active{
+
+ background:#e50914;
+
+ color:white;
+
+}
+
+.card{
+
+ background:#111;
+
+ border:1px solid #292929;
+
+ border-radius:20px;
+
+ padding:16px;
+
+ margin-bottom:14px;
+
+}
+
+.upload{
+
+ display:block;
+
+ background:#1d1d1d;
+
+ border-radius:15px;
+
+ padding:17px;
+
+ text-align:center;
+
+ font-weight:700;
+
+}
+
+input[type=file]{
+
+ display:none;
+
+}
+
+.preview{
+
+ width:100%;
+
+ max-height:430px;
+
+ object-fit:contain;
+
+ border-radius:15px;
+
+ margin-top:14px;
+
+ background:#000;
+
+}
+
+textarea{
+
+ width:100%;
+
+ min-height:110px;
+
+ margin-top:14px;
+
+ padding:14px;
+
+ border-radius:14px;
+
+ border:1px solid #333;
+
+ background:#080808;
+
+ color:white;
+
+ font-size:16px;
+
+ resize:vertical;
+
+}
+
+button{
+
+ font-family:inherit;
+
+}
+
+.ai{
+
+ width:100%;
+
+ margin-top:12px;
+
+ padding:15px;
+
+ border:0;
+
+ border-radius:15px;
+
+ background:#e50914;
+
+ color:white;
+
+ font-size:17px;
+
+ font-weight:700;
+
+}
+
+.secondary{
+
+ width:100%;
+
+ margin-top:10px;
+
+ padding:14px;
+
+ border:0;
+
+ border-radius:15px;
+
+ background:#252525;
+
+ color:white;
+
+ font-size:16px;
+
+}
+
+.status{
+
+ margin-top:12px;
+
+ color:#aaa;
+
+ min-height:24px;
+
+}
+
+.features{
+
+ display:grid;
+
+ grid-template-columns:1fr 1fr;
+
+ gap:10px;
+
+}
+
+.feature{
+
+ background:#191919;
+
+ border-radius:15px;
+
+ padding:15px;
+
+}
+
+.feature b{
+
+ display:block;
+
+ margin-bottom:5px;
+
+}
+
+.feature span{
+
+ color:#888;
+
+ font-size:13px;
+
+}
+
+.hidden{
+
+ display:none;
+
+}
+
+footer{
+
+ text-align:center;
+
+ color:#555;
+
+ font-size:12px;
+
+ margin-top:25px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="app">
+
+<h1>✨ AI Racing Studio</h1>
+
+<div class="subtitle">你的專用 AI 圖片、動畫及 Video 工作室</div>
+
+<div class="tabs">
+
+<button class="tab active" onclick="changeMode('image',this)">
+
+🖼️ 改相
+
+</button>
+
+<button class="tab" onclick="changeMode('animate',this)">
+
+🎬 動畫
+
+</button>
+
+<button class="tab" onclick="changeMode('video',this)">
+
+🎥 Video
+
+</button>
+
+</div>
+
+<div class="card">
+
+<div class="features">
+
+<div class="feature">
+
+<b>✨ AI 改相</b>
+
+<span>修改車身、顏色、文字及背景</span>
+
+</div>
+
+<div class="feature">
+
+<b>🎬 AI 動畫</b>
+
+<span>圖片變成動畫</span>
+
+</div>
+
+<div class="feature">
+
+<b>🎥 AI Video</b>
+
+<span>AI 修改影片</span>
+
+</div>
+
+<div class="feature">
+
+<b>📁 我的作品</b>
+
+<span>保存你的作品</span>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<label class="upload">
+
+📷 選擇圖片 / 影片
+
+<input id="file" type="file" accept="image/*">
+
+</label>
+
+<div id="preview"></div>
+
+<textarea id="prompt"
+
+placeholder="例如：
+
+將架 FN2 改紅色
+
+降低車身
+
+保留原本輪圈
+
+加上 AI racing"></textarea>
+
+<button class="ai" onclick="runAI()">
+
+✨ AI 修改
+
+</button>
+
+<div id="status" class="status"></div>
+
+<button id="save" class="secondary hidden" onclick="saveFile()">
+
+⬇️ 儲存作品
+
+</button>
+
+</div>
+
+<footer>
+
+AI Racing Studio v0.1
+
+</footer>
+
+</div>
+
+<script>
+
+let currentFile=null;
+
+let currentMode="image";
+
+const fileInput=document.getElementById("file");
+
+const preview=document.getElementById("preview");
+
+const prompt=document.getElementById("prompt");
+
+const status=document.getElementById("status");
+
+const saveButton=document.getElementById("save");
+
+fileInput.addEventListener("change",function(){
+
+ currentFile=this.files[0];
+
+ if(!currentFile)return;
+
+ const url=URL.createObjectURL(currentFile);
+
+ if(currentFile.type.startsWith("video")){
+
+  preview.innerHTML=
+
+  '<video class="preview" controls src="'+url+'"></video>';
+
+ }else{
+
+  preview.innerHTML=
+
+  '<img class="preview" src="'+url+'">';
+
+ }
+
+ status.innerText="已載入："+currentFile.name;
+
+ saveButton.classList.add("hidden");
+
+});
+
+function changeMode(mode,button){
+
+ currentMode=mode;
+
+ document.querySelectorAll(".tab")
+
+ .forEach(x=>x.classList.remove("active"));
+
+ button.classList.add("active");
+
+ if(mode==="image"){
+
+  fileInput.accept="image/*";
+
+  prompt.placeholder=
+
+  "例如：\n將架 FN2 改紅色\n降低車身\n加 AI racing";
+
+ }
+
+ if(mode==="animate"){
+
+  fileInput.accept="image/*";
+
+  prompt.placeholder=
+
+  "例如：\n令架車向前行\n鏡頭慢慢拉近\n加入速度感";
+
+ }
+
+ if(mode==="video"){
+
+  fileInput.accept="video/*";
+
+  prompt.placeholder=
+
+  "例如：\n將車身改紅色\n移除背景物件\n加入電影效果";
+
+ }
+
+ status.innerText="已切換到 "+mode+" 模式";
+
+}
+
+function runAI(){
+
+ if(!currentFile){
+
+  status.innerText="⚠️ 請先選擇圖片或影片";
+
+  return;
+
+ }
+
+ const text=prompt.value.trim();
+
+ if(!text){
+
+  status.innerText="⚠️ 請輸入你想修改的內容";
+
+  return;
+
+ }
+
+ status.innerText=
+
+ "✨ 已收到 AI 指令：「"+text+"」";
+
+ saveButton.classList.remove("hidden");
+
+}
+
+/*
+
+ 下一階段：
+
+ 將以下功能接入真正 AI 後端：
+
+ 1. AI Image Editing
+
+ 2. Image-to-Video
+
+ 3. Video-to-Video
+
+ 4. AI Object Removal
+
+ 5. Background Replacement
+
+ 6. AI Racing 專用模型
+
+*/
+
+function saveFile(){
+
+ if(!currentFile)return;
+
+ const url=URL.createObjectURL(currentFile);
+
+ const a=document.createElement("a");
+
+ a.href=url;
+
+ a.download="AI-Racing-"+currentFile.name;
+
+ document.body.appendChild(a);
+
+ a.click();
+
+ document.body.removeChild(a);
+
+}
+
+</script>
+
+</body>
+
+</html>
